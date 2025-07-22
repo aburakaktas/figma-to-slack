@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 10
+    }
+  },
+  "env": {
+    "FIGMA_PAT": "@figma_pat",
+    "SLACK_BOT_TOKEN": "@slack_bot_token",
+    "FIGMA_WEBHOOK_SECRET": "@figma_webhook_secret"
+  }
+}
