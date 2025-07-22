@@ -1,0 +1,11 @@
+{
+  "figmaFileUrl": "https://www.figma.com/design/MeshZOpiivU5P9nyXKrdaY/Holidu-Design-System?m=auto&node-id=600-1333&t=83TArkg9PDjp87Ql-1",
+  "slackChannelId": "C02HCNW9PEK",
+  "notifications": {
+    "libraryPublish": true,
+    "fileVersionUpdate": true,
+    "newComment": true,
+    "fileDeletion": false
+  },
+  "webhookId": "dev-webhook-id"
+}

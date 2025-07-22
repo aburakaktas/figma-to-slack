@@ -9,10 +9,41 @@ interface FigmaWebhook {
   description: string;
 }
 
+async function getFileInfo(fileKey: string): Promise<{ team_id: string }> {
+  const figmaPat = process.env.FIGMA_PAT;
+  if (!figmaPat) {
+    throw new Error('FIGMA_PAT environment variable is not set');
+  }
+
+  const response = await fetch(`https://api.figma.com/v1/files/${fileKey}`, {
+    headers: {
+      'X-Figma-Token': figmaPat,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to get file info: ${error}`);
+  }
+
+  const data = await response.json();
+  return { team_id: data.document.id }; // Use document.id as team identifier
+}
+
 export async function createWebhook(fileKey: string, endpoint: string): Promise<string> {
   const figmaPat = process.env.FIGMA_PAT;
   if (!figmaPat) {
     throw new Error('FIGMA_PAT environment variable is not set');
+  }
+
+  // First, get the team ID from the file
+  let teamId: string;
+  try {
+    const fileInfo = await getFileInfo(fileKey);
+    teamId = fileInfo.team_id;
+  } catch (error) {
+    // If we can't get file info, try using the fileKey directly as team_id
+    teamId = fileKey;
   }
 
   const response = await fetch(`https://api.figma.com/v2/webhooks`, {
@@ -23,7 +54,7 @@ export async function createWebhook(fileKey: string, endpoint: string): Promise<
     },
     body: JSON.stringify({
       event_type: 'FILE_UPDATE',
-      team_id: fileKey,
+      team_id: teamId,
       endpoint,
       passcode: process.env.FIGMA_WEBHOOK_SECRET || generatePasscode(),
       description: 'Figma to Slack Connector Webhook',
@@ -32,6 +63,7 @@ export async function createWebhook(fileKey: string, endpoint: string): Promise<
 
   if (!response.ok) {
     const error = await response.text();
+    console.error('Figma webhook creation error:', error);
     throw new Error(`Failed to create webhook: ${error}`);
   }
 
